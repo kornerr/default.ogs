@@ -113,6 +113,7 @@ node
         position = 0.000000 16.000000 0.000000
         material = wallSurface
         model = l2_env_wall
+        script = scripts/Sample.py
 scene = column
 scene = craneBase
 scene = floor
