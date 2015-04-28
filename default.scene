@@ -65,6 +65,7 @@ node
     floor
         material = floorSurface
         model = l2_env_floor
+        script = scripts/SampleInput.py
     line
         material = lineSurface
         model = l2_env_line
@@ -113,7 +114,6 @@ node
         position = 0.000000 16.000000 0.000000
         material = wallSurface
         model = l2_env_wall
-        script = scripts/Sample.py
 scene = column
 scene = craneBase
 scene = floor
