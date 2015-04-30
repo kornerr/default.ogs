@@ -11,22 +11,21 @@ class FancyInputListener(pymjin2.InputListener):
 class FancyInput(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
-        print "FancyInput.__init__"
+        self.core = None
+        #print "FancyInput.__init__"
     def __del__(self):
-        print "FancyInput.__del__"
+        #print "FancyInput.__del__"
+        pass
     def deinit(self):
-        print "FancyInput.deinit"
-        self.windowInput.removeListener(self.inputListener)
+        #print "FancyInput.deinit"
+        self.core.wndInput.removeListener(self.inputListener)
         self.inputListener = None
-    def init(self, window, windowInput, scene, nodeName):
-        print "FancyInput.init"
-        self.window = window
-        self.windowInput = windowInput
-        self.scene = scene
+    def init(self, core, nodeName):
+        #print "FancyInput.init"
+        self.core = core
         self.nodeName = nodeName
-        print "nn: ", self.nodeName
         self.inputListener = FancyInputListener()
-        self.windowInput.addListener(self.inputListener)
+        self.core.wndInput.addListener(self.inputListener)
 
 def create():
     return FancyInput()

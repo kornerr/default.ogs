@@ -1,4 +1,6 @@
-
+light
+    simpleLight
+        shadowTextureSize = 0 x 0
 lights
     light
         position = 30.000000 -30.000000 30.000000
@@ -66,6 +68,10 @@ node
         material = floorSurface
         model = l2_env_floor
         script = scripts/SampleInput.py
+    lightNode
+        light = simpleLight
+        position = 30.000000 -30.000000 30.000000
+        script = scripts/SyncLightPos.py
     line
         material = lineSurface
         model = l2_env_line
@@ -118,6 +124,7 @@ scene = column
 scene = craneBase
 scene = floor
 scene = light
+scene = lightNode
 scene = line
 scene = lineBelt1
 scene = lineBelt2
