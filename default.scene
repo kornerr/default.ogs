@@ -73,7 +73,7 @@ node
     lightNode
         light = simpleLight
         position = 30.000000 -30.000000 30.000000
-        script = scripts/SyncLightPos.py
+        script = scripts/ShadowedLight.py
     line
         material = lineSurface
         model = l2_env_line
