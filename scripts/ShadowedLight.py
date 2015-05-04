@@ -7,7 +7,7 @@ class ShadowedLightComponentListener(pymjin2.ComponentListener):
         self.parent = parent
         self.keys = [self.parent.key]
     def onComponentStateChange(self, st):
-        print "ShadowedLight.onComponentStateChange"
+        #print "ShadowedLight.onComponentStateChange"
         self.parent.sync(st.value(st.keys[0])[0])
 
 class ShadowedLight(pymjin2.DSceneNodeScriptInterface):
@@ -16,23 +16,27 @@ class ShadowedLight(pymjin2.DSceneNodeScriptInterface):
     def __del__(self):
         pass
     def deinit(self):
-        print "ShadowedLight.deinit"
+        #print "ShadowedLight.deinit"
         self.core.dscene.removeListener(self.listener)
         self.listener = None
         pass
     def init(self, core, nodeName):
-        print "ShadowedLight.init"
+        #print "ShadowedLight.init"
         self.core = core
         self.nodeName = nodeName
         self.key = "node.{0}.position".format(self.nodeName)
         self.listener = ShadowedLightComponentListener(self)
         self.core.dscene.addListener(self.listener.keys, self.listener)
+        # Light name.
+        lightNameKey = "node.{0}.light".format(self.nodeName)
+        s = self.core.dscene.state([lightNameKey])
+        lightName = s.value(lightNameKey)[0]
         # Assign shadow map.
-        # TODO: retrieve "simpleLight" from "node.{0}.light"
-        self.core.dsceneNodeLight.setGraph("simpleLight", self.core.dscene.graph())
-        self.core.shadowCompositor.setScene(self.core.dsceneNodeLight.lightShadow("simpleLight"))
+        self.core.dsceneNodeLight.setGraph(lightName, self.core.dscene.graph())
+        graph = self.core.dsceneNodeLight.lightShadow(lightName)
+        self.core.shadowCompositor.setScene(graph)
         self.core.shadowGraph.clear()
-        self.core.shadowGraph.add(self.core.dsceneNodeLight.lightShadow("simpleLight"))
+        self.core.shadowGraph.add(graph)
         # Sync right after assignment.
         self.sync()
     def sync(self, value = None):
