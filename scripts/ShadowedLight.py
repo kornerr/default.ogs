@@ -29,9 +29,10 @@ class ShadowedLight(pymjin2.DSceneNodeScriptInterface):
         self.core.dscene.addListener(self.listener.keys, self.listener)
         # Assign shadow map.
         # TODO: retrieve "simpleLight" from "node.{0}.light"
-#        self.core.shadowCompositor.setScene(self.core.dsceneNodeLight.lightShadow("simpleLight"))
-#        self.core.shadowGraph.clear()
-#        self.core.shadowGraph.add(self.core.dsceneNodeLight.lightShadow("simpleLight"))
+        self.core.dsceneNodeLight.setGraph("simpleLight", self.core.dscene.graph())
+        self.core.shadowCompositor.setScene(self.core.dsceneNodeLight.lightShadow("simpleLight"))
+        self.core.shadowGraph.clear()
+        self.core.shadowGraph.add(self.core.dsceneNodeLight.lightShadow("simpleLight"))
         # Sync right after assignment.
         self.sync()
     def sync(self, value = None):
