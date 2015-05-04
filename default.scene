@@ -3,15 +3,6 @@ light
         shadowFragmentShader = pipeline/pass1Shadow.frag
         shadowJitteringScale = 5
         shadowTextureSize = 512 x 512
-lights
-    light
-        position = 30.000000 -30.000000 30.000000
-shadows
-    shadow
-        shader = pipeline/pass1Shadow.frag
-        jitteringScale = 5.000000
-        light = light
-        textureSize = 512 x 512
 nodemodel
     box
         file = models/box.osgt
@@ -125,7 +116,6 @@ node
 scene = column
 scene = craneBase
 scene = floor
-scene = light
 scene = lightNode
 scene = line
 scene = lineBelt1
