@@ -1,8 +1,4 @@
-light
-    simpleLight
-        shadowFragmentShader = pipeline/pass1Shadow.frag
-        shadowJitteringScale = 5
-        shadowTextureSize = 512 x 512
+
 nodemodel
     box
         file = models/box.osgt
@@ -34,6 +30,11 @@ nodemodel
         file = models/l2_env_rail_base.osgt
     l2_env_wall
         file = models/l2_env_wall.osgt
+light
+    simpleLight
+        shadowJitteringScale = 38
+        shadowFragmentShader = pipeline/pass1Shadow.frag
+        shadowTextureSize = 512 x 512
 node
     column
         material = columnSurface
@@ -62,8 +63,8 @@ node
         model = l2_env_floor
         script = scripts/SampleInput.py
     lightNode
-        light = simpleLight
         position = 30.000000 -30.000000 30.000000
+        light = simpleLight
         script = scripts/ShadowedLight.py
     line
         material = lineSurface
