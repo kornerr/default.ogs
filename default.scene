@@ -1,4 +1,9 @@
 
+light
+    simpleLight
+        shadowJitteringScale = 38.000000
+        shadowFragmentShader = pipeline/pass1Shadow.frag
+        shadowTextureSize = 512 x 512
 nodemodel
     box
         file = models/box.osgt
@@ -30,11 +35,6 @@ nodemodel
         file = models/l2_env_rail_base.osgt
     l2_env_wall
         file = models/l2_env_wall.osgt
-light
-    simpleLight
-        shadowJitteringScale = 38
-        shadowFragmentShader = pipeline/pass1Shadow.frag
-        shadowTextureSize = 512 x 512
 node
     column
         material = columnSurface
