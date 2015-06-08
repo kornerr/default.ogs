@@ -11,20 +11,11 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
             print "key", key
             value = st.value(key)[0]
             if (key == self.parent.keyPos):
-                if (not self.parent.ignoreCameraUpdates):
-                    self.parent.syncCameraWithNode(value)
-                else:
-                    print "ignoreCameraUpdates"
+                self.parent.syncCameraWithNode(value)
             elif (key == self.parent.keyRot):
-                if (not self.parent.ignoreCameraUpdates):
-                    self.parent.syncCameraWithNode(None, value)
-                else:
-                    print "ignoreCameraUpdates"
+                self.parent.syncCameraWithNode(None, value)
             elif (key == "camera.position"):
-                if (not self.parent.ignoreNodeUpdates):
-                    self.parent.syncNodeWithCamera(value)
-                else:
-                    print "ignoreNodeUpdates"
+                self.parent.syncNodeWithCamera(value)
 
 class CameraControllerUIActions(object):
     def __init__(self, wnd):
@@ -52,8 +43,6 @@ class CameraControllerUIActions(object):
 class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
-        self.ignoreCameraUpdates = False
-        self.ignoreNodeUpdates = False
     def __del__(self):
         pass
     def deinit(self):
@@ -96,16 +85,12 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st = pymjin2.State()
         st.add("camera.position",  newPosValue)
         st.add("camera.rotationq", newRotValue)
-        self.ignoreCameraUpdates = True
         self.core.wnd.setState(st)
-        self.ignoreCameraUpdates = False
     def syncNodeWithCamera(self, value):
         print "syncNodeWithCamera", value
         st = pymjin2.State()
         st.add(self.keyPos, value)
-        self.ignoreNodeUpdates = True
         self.core.dscene.setState(st)
-        self.ignoreNodeUpdates = False
 
 def create():
     return CameraController()
