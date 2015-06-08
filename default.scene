@@ -36,6 +36,10 @@ nodemodel
     l2_env_wall
         file = models/l2_env_wall.osgt
 node
+    cameraNode
+        position = -2.600000 -17.900000 7.400000
+        rotation = 79.000000 0.000000 0.000000
+        script = scripts/CameraController.py
     column
         material = columnSurface
         model = l2_env_column
@@ -61,7 +65,6 @@ node
     floor
         material = floorSurface
         model = l2_env_floor
-        script = scripts/SampleInput.py
     lightNode
         position = 30.000000 -30.000000 30.000000
         light = simpleLight
@@ -131,3 +134,4 @@ scene = rpipe
 scene = rpipeDisk
 scene = subject
 scene = wall
+scene = cameraNode
