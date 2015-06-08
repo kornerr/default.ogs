@@ -6,13 +6,25 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
         pymjin2.ComponentListener.__init__(self)
         self.parent = parent
     def onComponentStateChange(self, st):
-        #print "CameraController.onComponentStateChange"
+        print "CameraController.onComponentStateChange"
         for key in st.keys:
+            print "key", key
             value = st.value(key)[0]
             if (key == self.parent.keyPos):
-                self.parent.syncPosRot(value)
+                if (not self.parent.ignoreCameraUpdates):
+                    self.parent.syncCameraWithNode(value)
+                else:
+                    print "ignoreCameraUpdates"
             elif (key == self.parent.keyRot):
-                self.parent.syncPosRot(None, value)
+                if (not self.parent.ignoreCameraUpdates):
+                    self.parent.syncCameraWithNode(None, value)
+                else:
+                    print "ignoreCameraUpdates"
+            elif (key == "camera.position"):
+                if (not self.parent.ignoreNodeUpdates):
+                    self.parent.syncNodeWithCamera(value)
+                else:
+                    print "ignoreNodeUpdates"
 
 class CameraControllerUIActions(object):
     def __init__(self, wnd):
@@ -23,27 +35,30 @@ class CameraControllerUIActions(object):
         s = pymjin2.State()
         postfix = None
         if (action == "MoveBackward"):
-            postfix = "backward"
+            postfix = "Backward"
         elif (action == "MoveDown"):
-            postfix = "down"
+            postfix = "Down"
         elif (action == "MoveForward"):
-            postfix = "forward"
+            postfix = "Forward"
         elif (action == "MoveLeft"):
-            postfix = "left"
+            postfix = "Left"
         elif (action == "MoveRight"):
-            postfix = "right"
+            postfix = "Right"
         elif (action == "MoveUp"):
-            postfix = "up"
-        s.add("camera.move." + postfix , "1" if state else "0")
+            postfix = "Up"
+        s.add("camera.move" + postfix , "1" if state else "0")
         self.wnd.setState(s)
 
 class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
+        self.ignoreCameraUpdates = False
+        self.ignoreNodeUpdates = False
     def __del__(self):
         pass
     def deinit(self):
         self.core.dscene.removeListener(self.componentListener)
+        self.core.wnd.removeListener(self.componentListener)
         self.componentListener = None
         self.core.uiActions.removeListener(self.uiActions)
         self.uiActions = None
@@ -56,8 +71,9 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.dscene.addListener([self.keyPos,
                                       self.keyRot],
                                       self.componentListener)
+        self.core.wnd.addListener(["camera.position"], self.componentListener)
         # Sync right after assignment.
-        self.syncPosRot()
+        self.syncCameraWithNode()
         self.uiActions = CameraControllerUIActions(self.core.wnd)
         self.core.uiActions.addListener(self.uiActions)
         # Setup camera shortcuts.
@@ -65,7 +81,7 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
         self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
-    def syncPosRot(self, posValue = None, rotValue = None):
+    def syncCameraWithNode(self, posValue = None, rotValue = None):
         # Position.
         newPosValue = posValue
         if (newPosValue is None):
@@ -80,7 +96,16 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st = pymjin2.State()
         st.add("camera.position",  newPosValue)
         st.add("camera.rotationq", newRotValue)
+        self.ignoreCameraUpdates = True
         self.core.wnd.setState(st)
+        self.ignoreCameraUpdates = False
+    def syncNodeWithCamera(self, value):
+        print "syncNodeWithCamera", value
+        st = pymjin2.State()
+        st.add(self.keyPos, value)
+        self.ignoreNodeUpdates = True
+        self.core.dscene.setState(st)
+        self.ignoreNodeUpdates = False
 
 def create():
     return CameraController()
