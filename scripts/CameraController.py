@@ -21,17 +21,21 @@ class CameraControllerInputListener(pymjin2.InputListener):
     def __init__(self, parent):
         pymjin2.InputListener.__init__(self)
         self.parent = parent
+        self.lastX = None
         self.lastY = None
         self.enableRotation = False
     def onWindowInput(self, e):
         if (e.input == pymjin2.INPUT_MOUSE_BUTTON_RIGHT):
             self.enableRotation = e.press
+            self.lastX = e.x
             self.lastY = e.y
         elif ((e.input == pymjin2.INPUT_MOUSE_MOVE) and
               self.enableRotation):
+            deltaX = self.lastX - e.x
             deltaY = self.lastY - e.y
+            self.lastX = e.x
             self.lastY = e.y
-            self.parent.rotateNodeBy(0, deltaY)
+            self.parent.rotateNodeBy(deltaX, deltaY)
         return False
 
 class CameraControllerUIActions(object):
@@ -93,12 +97,15 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.uiActionsShortcuts.setState(st)
         self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
     def rotateNodeBy(self, dx, dy):
-        print "rotateNodeBy", dx, dy
-        key = "node.{0}.rotationx".format(self.nodeName)
-        st = self.core.dscene.state([key])
-        value = float(st.value(key)[0])
-        value += dy * self.mouseSensitivity
-        st.set(key, str(value))
+        keyx = "node.{0}.rotationx".format(self.nodeName)
+        keyz = "node.{0}.rotationz".format(self.nodeName)
+        st = self.core.dscene.state([keyx, keyz])
+        valuex = float(st.value(keyx)[0])
+        valuex += dy * self.mouseSensitivity
+        st.set(keyx, str(valuex))
+        valuez = float(st.value(keyz)[0])
+        valuez += dx * self.mouseSensitivity
+        st.set(keyz, str(valuez))
         self.core.dscene.setState(st)
     def syncCameraWithNode(self, posValue = None, rotValue = None):
         # Position.

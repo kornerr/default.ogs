@@ -37,8 +37,8 @@ nodemodel
         file = models/l2_env_wall.osgt
 node
     cameraNode
-        position = -2.600000 -17.900000 7.400000
-        rotation = 79.000000 0.000000 0.000000
+        position = -6.221874 -24.086277 14.148228
+        rotation = 70.051376 0.000001 336.502808
         script = scripts/CameraController.py
     column
         material = columnSurface
