@@ -16,6 +16,8 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
                 self.parent.syncCameraWithNode(None, value)
             elif (key == "camera.position"):
                 self.parent.syncNodeWithCamera(value)
+            elif (key == "camera.rotationq"):
+                self.parent.syncNodeWithCamera(None, value)
 
 class CameraControllerInputListener(pymjin2.InputListener):
     def __init__(self, parent):
@@ -65,6 +67,7 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
         self.mouseSensitivity = 0.05
+        self.ignoreCameraSync = False
     def __del__(self):
         pass
     def deinit(self):
@@ -84,7 +87,10 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.dscene.addListener([self.keyPos,
                                       self.keyRot],
                                       self.componentListener)
-        self.core.wnd.addListener(["camera.position"], self.componentListener)
+        self.core.wnd.addListener(
+            ["camera.position",
+             "camera.rotationq"],
+            self.componentListener)
         self.inputListener = CameraControllerInputListener(self)
         self.core.wndInput.addListener(self.inputListener)
         # Sync right after assignment.
@@ -108,6 +114,8 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st.set(keyz, str(valuez))
         self.core.dscene.setState(st)
     def syncCameraWithNode(self, posValue = None, rotValue = None):
+        if (self.ignoreCameraSync):
+            return;
         # Position.
         newPosValue = posValue
         if (newPosValue is None):
@@ -123,10 +131,25 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st.add("camera.position",  newPosValue)
         st.add("camera.rotationq", newRotValue)
         self.core.wnd.setState(st)
-    def syncNodeWithCamera(self, value):
+    def syncNodeWithCamera(self, posValue = None, rotValue = None):
+        # Position.
+        newPosValue = posValue
+        if (newPosValue is None):
+            st = self.core.dscene.state([self.keyPos])
+            newPosValue = st.value(self.keyPos)[0]
+        # Rotation.
+        newRotValue = rotValue
+        if (newRotValue is None):
+            st = self.core.dscene.state([self.keyRot])
+            newRotValue = st.value(self.keyRot)[0]
         st = pymjin2.State()
-        st.add(self.keyPos, value)
+        st.add(self.keyPos, newPosValue)
+        st.add(self.keyRot, newRotValue)
+        self.ignoreCameraSync = True
         self.core.dscene.setState(st)
+        self.ignoreCameraSync = False
+        # Center mouse after movement.
+        #self.core.wndMouse.center()
 
 def create():
     return CameraController()
