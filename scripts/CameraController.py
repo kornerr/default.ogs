@@ -34,6 +34,8 @@ class CameraControllerInputListener(pymjin2.InputListener):
             st = pymjin2.State()
             st.set("mouse.visible", "0" if self.enableRotation else "1")
             self.parent.core.wnd.setState(st)
+            self.parent.core.uiActionsShortcuts.setGroupEnabled(
+                "CameraController", self.enableRotation)
         elif ((e.input == pymjin2.INPUT_MOUSE_MOVE) and
               self.enableRotation):
             deltaX = self.lastX - e.x
@@ -108,7 +110,6 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st = self.core.pini.load("camera.shortcuts")
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
-        self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
     def rotateNodeBy(self, dx, dy):
         keyx = "node.{0}.rotationx".format(self.nodeName)
         keyz = "node.{0}.rotationz".format(self.nodeName)
