@@ -8,7 +8,7 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
     def onComponentStateChange(self, st):
         #print "CameraController.onComponentStateChange"
         for key in st.keys:
-            #print "key", key
+            #print "key", key, "value", st.value(key)
             value = st.value(key)[0]
             if (key == self.parent.keyPos):
                 self.parent.syncCameraWithNode(value)
@@ -31,13 +31,20 @@ class CameraControllerInputListener(pymjin2.InputListener):
             self.enableRotation = e.press
             self.lastX = e.x
             self.lastY = e.y
+            st = pymjin2.State()
+            st.set("mouse.visible", "0" if self.enableRotation else "1")
+            self.parent.core.wnd.setState(st)
         elif ((e.input == pymjin2.INPUT_MOUSE_MOVE) and
               self.enableRotation):
             deltaX = self.lastX - e.x
             deltaY = self.lastY - e.y
-            self.lastX = e.x
-            self.lastY = e.y
             self.parent.rotateNodeBy(deltaX, deltaY)
+            # Center mouse.
+            self.parent.core.wndMouse.center()
+            st = self.parent.core.wnd.state(["mouse.center"])
+            v = st.value("mouse.center")[0].split(" ")
+            self.lastX = int(v[0])
+            self.lastY = int(v[1])
         return False
 
 class CameraControllerUIActions(object):
@@ -66,7 +73,7 @@ class CameraControllerUIActions(object):
 class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
-        self.mouseSensitivity = 0.05
+        self.mouseSensitivity = 0.1
         self.ignoreCameraSync = False
     def __del__(self):
         pass
@@ -148,8 +155,6 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.ignoreCameraSync = True
         self.core.dscene.setState(st)
         self.ignoreCameraSync = False
-        # Center mouse after movement.
-        #self.core.wndMouse.center()
 
 def create():
     return CameraController()
