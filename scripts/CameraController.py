@@ -27,7 +27,7 @@ class CameraControllerInputListener(pymjin2.InputListener):
         self.lastY = None
         self.enableRotation = False
     def onWindowInput(self, e):
-        if (e.input == pymjin2.INPUT_MOUSE_BUTTON_RIGHT):
+        if (e.input == pymjin2.INPUT_MOUSE_BUTTON_LEFT):
             self.enableRotation = e.press
             self.lastX = e.x
             self.lastY = e.y
@@ -75,7 +75,7 @@ class CameraControllerUIActions(object):
 class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
-        self.mouseSensitivity = 1.0
+        self.mouseSensitivity = 0.1
         self.ignoreCameraSync = False
     def __del__(self):
         pass
@@ -110,28 +110,28 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st = self.core.pini.load("camera.shortcuts")
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
-    def rotateNodeBy(self, dx, dy):
-        print "rotateNodeBy", dx, dy
+    def rotateNodeBy(self, dz, dx):
+        print "rotateNodeBy", dz, dx
         keys = []
         keyx = "node.{0}.rotationx".format(self.nodeName)
         keyz = "node.{0}.rotationz".format(self.nodeName)
+        if (dz != 0):
+            keys.append(keyz)
         if (dx != 0):
             keys.append(keyx)
-        if (dy != 0):
-            keys.append(keyz)
         if (len(keys)):
             st = self.core.dscene.state(keys)
             if (dx != 0):
                 valuex = float(st.value(keyx)[0])
                 print "valuex ", valuex, "->",
-                diff = float(dy) * self.mouseSensitivity
+                diff = float(dx) * self.mouseSensitivity
                 valuex += diff
                 print valuex, "diff:", diff
                 st.set(keyx, str(valuex))
-            if (dy != 0):
+            if (dz != 0):
                 valuez = float(st.value(keyz)[0])
                 print "valuez ", valuez, "->",
-                diff = float(dx) * self.mouseSensitivity
+                diff = float(dz) * self.mouseSensitivity
                 valuez += diff
                 print valuez, "diff:", diff
                 st.set(keyz, str(valuez))
