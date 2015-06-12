@@ -75,7 +75,7 @@ class CameraControllerUIActions(object):
 class CameraController(pymjin2.DSceneNodeScriptInterface):
     def __init__(self):
         pymjin2.DSceneNodeScriptInterface.__init__(self)
-        self.mouseSensitivity = 0.1
+        self.mouseSensitivity = 1.0
         self.ignoreCameraSync = False
     def __del__(self):
         pass
@@ -111,16 +111,31 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
     def rotateNodeBy(self, dx, dy):
+        print "rotateNodeBy", dx, dy
+        keys = []
         keyx = "node.{0}.rotationx".format(self.nodeName)
         keyz = "node.{0}.rotationz".format(self.nodeName)
-        st = self.core.dscene.state([keyx, keyz])
-        valuex = float(st.value(keyx)[0])
-        valuex += dy * self.mouseSensitivity
-        st.set(keyx, str(valuex))
-        valuez = float(st.value(keyz)[0])
-        valuez += dx * self.mouseSensitivity
-        st.set(keyz, str(valuez))
-        self.core.dscene.setState(st)
+        if (dx != 0):
+            keys.append(keyx)
+        if (dy != 0):
+            keys.append(keyz)
+        if (len(keys)):
+            st = self.core.dscene.state(keys)
+            if (dx != 0):
+                valuex = float(st.value(keyx)[0])
+                print "valuex ", valuex, "->",
+                diff = float(dy) * self.mouseSensitivity
+                valuex += diff
+                print valuex, "diff:", diff
+                st.set(keyx, str(valuex))
+            if (dy != 0):
+                valuez = float(st.value(keyz)[0])
+                print "valuez ", valuez, "->",
+                diff = float(dx) * self.mouseSensitivity
+                valuez += diff
+                print valuez, "diff:", diff
+                st.set(keyz, str(valuez))
+            self.core.dscene.setState(st)
     def syncCameraWithNode(self, posValue = None, rotValue = None):
         if (self.ignoreCameraSync):
             return;
