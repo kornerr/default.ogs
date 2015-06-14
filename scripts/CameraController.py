@@ -41,10 +41,13 @@ class CameraControllerInputListener(pymjin2.InputListener):
             deltaX = self.lastX - e.x
             deltaY = self.lastY - e.y
             self.parent.rotateNodeBy(deltaX, deltaY)
+            st = self.parent.core.wnd.state(["mouse.center", "mouse.position"])
             # Center mouse.
-            self.parent.core.wndMouse.center()
-            st = self.parent.core.wnd.state(["mouse.center"])
-            v = st.value("mouse.center")[0].split(" ")
+            s = pymjin2.State()
+            center = st.value("mouse.center")[0]
+            s.set("mouse.position", center)
+            self.parent.core.wnd.setState(s)
+            v = center.split(" ")
             self.lastX = int(v[0])
             self.lastY = int(v[1])
         return False
@@ -111,7 +114,6 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
     def rotateNodeBy(self, dz, dx):
-        print "rotateNodeBy", dz, dx
         keys = []
         keyx = "node.{0}.rotationx".format(self.nodeName)
         keyz = "node.{0}.rotationz".format(self.nodeName)
@@ -123,17 +125,13 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
             st = self.core.dscene.state(keys)
             if (dx != 0):
                 valuex = float(st.value(keyx)[0])
-                print "valuex ", valuex, "->",
                 diff = float(dx) * self.mouseSensitivity
                 valuex += diff
-                print valuex, "diff:", diff
                 st.set(keyx, str(valuex))
             if (dz != 0):
                 valuez = float(st.value(keyz)[0])
-                print "valuez ", valuez, "->",
                 diff = float(dz) * self.mouseSensitivity
                 valuez += diff
-                print valuez, "diff:", diff
                 st.set(keyz, str(valuez))
             self.core.dscene.setState(st)
     def syncCameraWithNode(self, posValue = None, rotValue = None):
