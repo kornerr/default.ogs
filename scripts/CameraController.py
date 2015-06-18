@@ -27,7 +27,7 @@ class CameraControllerInputListener(pymjin2.InputListener):
         self.lastY = None
         self.enableRotation = False
     def onWindowInput(self, e):
-        if (e.input == pymjin2.INPUT_MOUSE_BUTTON_LEFT):
+        if (e.input == pymjin2.INPUT_MOUSE_BUTTON_RIGHT):
             self.enableRotation = e.press
             self.lastX = e.x
             self.lastY = e.y
