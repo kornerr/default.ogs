@@ -5,9 +5,6 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
     def __init__(self, parent):
         pymjin2.ComponentListener.__init__(self)
         self.parent = parent
-        self.lastX = None
-        self.lastY = None
-        self.center = None
     def onComponentStateChange(self, st):
         #print "CameraController.onComponentStateChange"
         for key in st.keys:
@@ -22,25 +19,19 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
             elif (key == "camera.rotationq"):
                 self.parent.syncNodeWithCamera(None, value)
             elif (key == "mouse.center"):
-                self.center = value
+                self.parent.mouseCenter = value
             elif (key == "mouse.position"):
                 v = value.split(" ")
                 x = int(v[0])
                 y = int(v[1])
                 if (self.parent.enableRotation):
-                    deltaX = self.lastX - x
-                    deltaY = self.lastY - y
+                    deltaX = self.parent.mouseLastX - x
+                    deltaY = self.parent.mouseLastY - y
                     self.parent.rotateNodeBy(deltaX, deltaY)
-                    # Center mouse.
-                    s = pymjin2.State()
-                    s.set("mouse.position", self.center)
-                    self.parent.core.wnd.setState(s)
-                    v = self.center.split(" ")
-                    self.lastX = int(v[0])
-                    self.lastY = int(v[1])
+                    self.parent.centerMouse()
                 else:
-                    self.lastX = x
-                    self.lastY = y
+                    self.parent.mouseLastX = x
+                    self.parent.mouseLastY = y
 
 class CameraControllerUIActions(object):
     def __init__(self, parent):
@@ -56,8 +47,18 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.mouseSensitivity = 0.1
         self.ignoreCameraSync = False
         self.enableRotation = False
+        self.mouseCenter = None
+        self.mouseLastX = None
+        self.mouseLastY = None
     def __del__(self):
         pass
+    def centerMouse(self):
+        s = pymjin2.State()
+        s.set("mouse.position", self.mouseCenter)
+        v = self.mouseCenter.split(" ")
+        self.mouseLastX = int(v[0])
+        self.mouseLastY = int(v[1])
+        self.core.wnd.setState(s)
     def deinit(self):
         self.core.dscene.removeListener(self.componentListener)
         self.core.wnd.removeListener(self.componentListener)
