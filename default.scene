@@ -37,60 +37,60 @@ nodemodel
         file = models/l2_env_wall.osgt
 node
     cameraNode
-        position = -6.221874 -24.086277 14.148228
-        rotation = 70.051376 0.000001 336.502808
+        position = -5.555146 -33.279274 18.091686
+        rotation = 66.452934 -0.001158 348.006714
         script = scripts/CameraController.py
     column
         material = columnSurface
         model = l2_env_column
     craneBase
-        position = 0.000000 0.000000 8.100000
         material = craneBaseSurface
+        position = 0.000000 0.000000 8.100000
         model = l2_env_crane_base
     craneArmsBase
-        position = 0.000000 0.000000 -0.200000
         material = craneArmsBaseSurface
+        position = 0.000000 0.000000 -0.200000
         model = l2_env_crane_arms_base
         parent = craneBase
     craneArmsPistonBase
-        position = 0.000000 0.000000 -0.600000
         material = craneArmsPistonBaseSurface
+        position = 0.000000 0.000000 -0.600000
         model = l2_env_crane_arms_piston_base
         parent = craneArmsBase
     craneArmsPiston
-        position = 0.000000 0.000000 -0.200000
         material = craneArmsPistonSurface
+        position = 0.000000 0.000000 -0.200000
         model = l2_env_crane_arms_piston
         parent = craneArmsPistonBase
     floor
         material = floorSurface
         model = l2_env_floor
     lightNode
-        position = 30.000000 -30.000000 30.000000
         light = simpleLight
+        position = 30.000000 -30.000000 30.000000
         script = scripts/ShadowedLight.py
     line
         material = lineSurface
         model = l2_env_line
     lineBelt1
-        position = 0.000000 10.000000 0.000000
         material = lineBeltSurface
+        position = 0.000000 10.000000 0.000000
         model = l2_env_line_belt
     lineBelt2
-        position = 0.000000 2.000000 0.000000
         material = lineBeltSurface
+        position = 0.000000 2.000000 0.000000
         model = l2_env_line_belt
     lineBelt3
-        position = 0.000000 -6.000000 0.000000
         material = lineBeltSurface
+        position = 0.000000 -6.000000 0.000000
         model = l2_env_line_belt
     pipe
-        position = -4.500000 0.000000 6.100000
         material = pipeSurface
+        position = -4.500000 0.000000 6.100000
         model = l2_env_pipe
     pipeDisk
-        position = -4.500000 0.000000 6.100000
         material = pipeDiskSurface
+        position = -4.500000 0.000000 6.100000
         model = l2_env_pipe_disk
     processor
         material = processorSurface
@@ -102,20 +102,20 @@ node
         material = railBaseSurface
         model = l2_env_rail_base
     rpipe
-        position = 4.500000 0.000000 6.100000
         material = pipeSurface
+        position = 4.500000 0.000000 6.100000
         model = l2_env_pipe
     rpipeDisk
-        position = 4.500000 0.000000 6.100000
         material = pipeDiskSurface
+        position = 4.500000 0.000000 6.100000
         model = l2_env_pipe_disk
     subject
-        position = -3.000000 10.000000 0.600000
         material = subjectSurface
+        position = -3.000000 10.000000 0.600000
         model = box
     wall
-        position = 0.000000 16.000000 0.000000
         material = wallSurface
+        position = 0.000000 16.000000 0.000000
         model = l2_env_wall
 scene = column
 scene = craneBase

@@ -14,3 +14,5 @@ CameraController
     MoveUp
         key = INPUT_KEY_W
         key = INPUT_KEY_ALT_L
+    ToggleMove
+        key = INPUT_MOUSE_BUTTON_RIGHT

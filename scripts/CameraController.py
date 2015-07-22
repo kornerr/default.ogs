@@ -6,9 +6,9 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
         pymjin2.ComponentListener.__init__(self)
         self.parent = parent
     def onComponentStateChange(self, st):
-        #print "CameraController.onComponentStateChange"
+        print "CameraController.onComponentStateChange"
         for key in st.keys:
-            #print "key", key, "value", st.value(key)
+            print "key", key, "value", st.value(key)
             value = st.value(key)[0]
             if (key == self.parent.keyPos):
                 self.parent.syncCameraWithNode(value)
@@ -18,6 +18,8 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
                 self.parent.syncNodeWithCamera(value)
             elif (key == "camera.rotationq"):
                 self.parent.syncNodeWithCamera(None, value)
+            #elif (key == "mouse.position"):
+                
 
 class CameraControllerInputListener(pymjin2.InputListener):
     def __init__(self, parent):
@@ -55,24 +57,40 @@ class CameraControllerInputListener(pymjin2.InputListener):
 class CameraControllerUIActions(object):
     def __init__(self, wnd):
         self.wnd = wnd
+        self.enableRotation = False
     def name(self):
         return "CameraController"
     def onUIActionsExecute(self, action, state):
         s = pymjin2.State()
-        postfix = None
-        if (action == "MoveBackward"):
-            postfix = "Backward"
-        elif (action == "MoveDown"):
-            postfix = "Down"
-        elif (action == "MoveForward"):
-            postfix = "Forward"
-        elif (action == "MoveLeft"):
-            postfix = "Left"
-        elif (action == "MoveRight"):
-            postfix = "Right"
-        elif (action == "MoveUp"):
-            postfix = "Up"
-        s.add("camera.move" + postfix , "1" if state else "0")
+        print "onUIActionsExecute", action, state
+        if (action == "ToggleMove"):
+            self.enableRotation = state
+            print "enablerotation", state
+            s.set("mouse.visible", "0" if self.enableRotation else "1")
+            if (not self.enableRotation):
+                s.set("camera.moveBackward", "0")
+                s.set("camera.moveDown",     "0")
+                s.set("camera.moveForward",  "0")
+                s.set("camera.moveLeft",     "0")
+                s.set("camera.moveRight",    "0")
+                s.set("camera.moveUp",       "0")
+        if (self.enableRotation):
+            postfix = None
+            if (action == "MoveBackward"):
+                postfix = "Backward"
+            elif (action == "MoveDown"):
+                postfix = "Down"
+            elif (action == "MoveForward"):
+                postfix = "Forward"
+            elif (action == "MoveLeft"):
+                postfix = "Left"
+            elif (action == "MoveRight"):
+                postfix = "Right"
+            elif (action == "MoveUp"):
+                postfix = "Up"
+            if (postfix):
+                print "postfix", postfix
+                s.set("camera.move" + postfix , "1" if state else "0")
         self.wnd.setState(s)
 
 class CameraController(pymjin2.DSceneNodeScriptInterface):
@@ -88,7 +106,7 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         self.componentListener = None
         self.core.uiActions.removeListener(self.uiActions)
         self.uiActions = None
-        self.core.wndInput.removeListener(self.inputListener)
+        #self.core.wndInput.removeListener(self.inputListener)
         self.inputListener = None
     def init(self, core, nodeName):
         self.core = core
@@ -101,10 +119,12 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
                                       self.componentListener)
         self.core.wnd.addListener(
             ["camera.position",
-             "camera.rotationq"],
+             "camera.rotationq",
+             "mouse.position",
+             "mouse.center"],
             self.componentListener)
         self.inputListener = CameraControllerInputListener(self)
-        self.core.wndInput.addListener(self.inputListener)
+        #self.core.wndInput.addListener(self.inputListener)
         # Sync right after assignment.
         self.syncCameraWithNode()
         self.uiActions = CameraControllerUIActions(self.core.wnd)
@@ -113,6 +133,7 @@ class CameraController(pymjin2.DSceneNodeScriptInterface):
         st = self.core.pini.load("camera.shortcuts")
         self.core.uiActionsShortcuts.clear()
         self.core.uiActionsShortcuts.setState(st)
+        self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
     def rotateNodeBy(self, dz, dx):
         keys = []
         keyx = "node.{0}.rotationx".format(self.nodeName)
