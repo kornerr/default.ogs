@@ -5,10 +5,13 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
     def __init__(self, parent):
         pymjin2.ComponentListener.__init__(self)
         self.parent = parent
+        self.lastX = None
+        self.lastY = None
+        self.center = None
     def onComponentStateChange(self, st):
-        print "CameraController.onComponentStateChange"
+        #print "CameraController.onComponentStateChange"
         for key in st.keys:
-            print "key", key, "value", st.value(key)
+            #print "key", key, "value", st.value(key)
             value = st.value(key)[0]
             if (key == self.parent.keyPos):
                 self.parent.syncCameraWithNode(value)
@@ -18,55 +21,79 @@ class CameraControllerComponentListener(pymjin2.ComponentListener):
                 self.parent.syncNodeWithCamera(value)
             elif (key == "camera.rotationq"):
                 self.parent.syncNodeWithCamera(None, value)
-            #elif (key == "mouse.position"):
-                
-
-class CameraControllerInputListener(pymjin2.InputListener):
-    def __init__(self, parent):
-        pymjin2.InputListener.__init__(self)
-        self.parent = parent
-        self.lastX = None
-        self.lastY = None
-        self.enableRotation = False
-    def onWindowInput(self, e):
-        if (e.input == pymjin2.INPUT_MOUSE_BUTTON_RIGHT):
-            self.enableRotation = e.press
-            self.lastX = e.x
-            self.lastY = e.y
-            st = pymjin2.State()
-            st.set("mouse.visible", "0" if self.enableRotation else "1")
-            self.parent.core.wnd.setState(st)
-            self.parent.core.uiActionsShortcuts.setGroupEnabled(
-                "CameraController", self.enableRotation)
-        elif ((e.input == pymjin2.INPUT_MOUSE_MOVE) and
-              self.enableRotation):
-            deltaX = self.lastX - e.x
-            deltaY = self.lastY - e.y
-            self.parent.rotateNodeBy(deltaX, deltaY)
-            st = self.parent.core.wnd.state(["mouse.center", "mouse.position"])
-            # Center mouse.
-            s = pymjin2.State()
-            center = st.value("mouse.center")[0]
-            s.set("mouse.position", center)
-            self.parent.core.wnd.setState(s)
-            v = center.split(" ")
-            self.lastX = int(v[0])
-            self.lastY = int(v[1])
-        return False
+            elif (key == "mouse.center"):
+                self.center = value
+            elif (key == "mouse.position"):
+                v = value.split(" ")
+                x = int(v[0])
+                y = int(v[1])
+                if (self.parent.enableRotation):
+                    deltaX = self.lastX - x
+                    deltaY = self.lastY - y
+                    self.parent.rotateNodeBy(deltaX, deltaY)
+                    # Center mouse.
+                    s = pymjin2.State()
+                    s.set("mouse.position", self.center)
+                    self.parent.core.wnd.setState(s)
+                    v = self.center.split(" ")
+                    self.lastX = int(v[0])
+                    self.lastY = int(v[1])
+                else:
+                    self.lastX = x
+                    self.lastY = y
 
 class CameraControllerUIActions(object):
-    def __init__(self, wnd):
-        self.wnd = wnd
-        self.enableRotation = False
+    def __init__(self, parent):
+        self.parent = parent
     def name(self):
         return "CameraController"
     def onUIActionsExecute(self, action, state):
+        self.parent.processUIAction(action, state)
+
+class CameraController(pymjin2.DSceneNodeScriptInterface):
+    def __init__(self):
+        pymjin2.DSceneNodeScriptInterface.__init__(self)
+        self.mouseSensitivity = 0.1
+        self.ignoreCameraSync = False
+        self.enableRotation = False
+    def __del__(self):
+        pass
+    def deinit(self):
+        self.core.dscene.removeListener(self.componentListener)
+        self.core.wnd.removeListener(self.componentListener)
+        self.componentListener = None
+        self.core.uiActions.removeListener(self.uiActions)
+        self.uiActions = None
+    def init(self, core, nodeName):
+        self.core = core
+        self.nodeName = nodeName
+        self.keyPos = "node.{0}.position".format(nodeName)
+        self.keyRot = "node.{0}.rotationq".format(nodeName)
+        self.componentListener = CameraControllerComponentListener(self)
+        self.core.dscene.addListener([self.keyPos,
+                                      self.keyRot],
+                                      self.componentListener)
+        self.core.wnd.addListener(
+            ["camera.position",
+             "camera.rotationq",
+             "mouse.position",
+             "mouse.center"],
+            self.componentListener)
+        # Sync right after assignment.
+        self.syncCameraWithNode()
+        self.uiActions = CameraControllerUIActions(self)
+        self.core.uiActions.addListener(self.uiActions)
+        # Setup camera shortcuts.
+        st = self.core.pini.load("camera.shortcuts")
+        self.core.uiActionsShortcuts.clear()
+        self.core.uiActionsShortcuts.setState(st)
+        self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
+    def processUIAction(self, action, state):
         s = pymjin2.State()
-        print "onUIActionsExecute", action, state
         if (action == "ToggleMove"):
             self.enableRotation = state
-            print "enablerotation", state
             s.set("mouse.visible", "0" if self.enableRotation else "1")
+            # Disable all movement.
             if (not self.enableRotation):
                 s.set("camera.moveBackward", "0")
                 s.set("camera.moveDown",     "0")
@@ -89,51 +116,8 @@ class CameraControllerUIActions(object):
             elif (action == "MoveUp"):
                 postfix = "Up"
             if (postfix):
-                print "postfix", postfix
                 s.set("camera.move" + postfix , "1" if state else "0")
-        self.wnd.setState(s)
-
-class CameraController(pymjin2.DSceneNodeScriptInterface):
-    def __init__(self):
-        pymjin2.DSceneNodeScriptInterface.__init__(self)
-        self.mouseSensitivity = 0.1
-        self.ignoreCameraSync = False
-    def __del__(self):
-        pass
-    def deinit(self):
-        self.core.dscene.removeListener(self.componentListener)
-        self.core.wnd.removeListener(self.componentListener)
-        self.componentListener = None
-        self.core.uiActions.removeListener(self.uiActions)
-        self.uiActions = None
-        #self.core.wndInput.removeListener(self.inputListener)
-        self.inputListener = None
-    def init(self, core, nodeName):
-        self.core = core
-        self.nodeName = nodeName
-        self.keyPos = "node.{0}.position".format(nodeName)
-        self.keyRot = "node.{0}.rotationq".format(nodeName)
-        self.componentListener = CameraControllerComponentListener(self)
-        self.core.dscene.addListener([self.keyPos,
-                                      self.keyRot],
-                                      self.componentListener)
-        self.core.wnd.addListener(
-            ["camera.position",
-             "camera.rotationq",
-             "mouse.position",
-             "mouse.center"],
-            self.componentListener)
-        self.inputListener = CameraControllerInputListener(self)
-        #self.core.wndInput.addListener(self.inputListener)
-        # Sync right after assignment.
-        self.syncCameraWithNode()
-        self.uiActions = CameraControllerUIActions(self.core.wnd)
-        self.core.uiActions.addListener(self.uiActions)
-        # Setup camera shortcuts.
-        st = self.core.pini.load("camera.shortcuts")
-        self.core.uiActionsShortcuts.clear()
-        self.core.uiActionsShortcuts.setState(st)
-        self.core.uiActionsShortcuts.setGroupEnabled("CameraController", True)
+        self.core.wnd.setState(s)
     def rotateNodeBy(self, dz, dx):
         keys = []
         keyx = "node.{0}.rotationx".format(self.nodeName)
